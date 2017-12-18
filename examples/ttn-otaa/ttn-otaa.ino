@@ -60,10 +60,10 @@ const unsigned TX_INTERVAL = 60;
 
 // Pin mapping
 const lmic_pinmap lmic_pins = {
-    .nss = 6,
+    .nss = 10,                       // chip select on feather (rf95module) CS
     .rxtx = LMIC_UNUSED_PIN,
-    .rst = 5,
-    .dio = {2, 3, 4},
+    .rst = 9,                       // reset pin
+    .dio = {2, 6, 7}, 
 };
 
 void onEvent (ev_t ev) {

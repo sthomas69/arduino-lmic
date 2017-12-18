@@ -914,8 +914,11 @@ static void setupRx2 (void) {
 static void schedRx12 (ostime_t delay, osjobcb_t func, u1_t dr) {
     ostime_t hsym = dr2hsym(dr);
 
-    LMIC.rxsyms = MINRX_SYMS;
-
+#if defined(FOR_LG01_GW)
+	LMIC.rxsyms = MINRX_SYMS * 50;
+#else
+   	LMIC.rxsyms = MINRX_SYMS;	
+#endif // For use with LG01 (with Mega328P) OTAA
     // If a clock error is specified, compensate for it by extending the
     // receive window
     if (LMIC.clockError != 0) {
@@ -1634,6 +1637,7 @@ static void engineUpdate (void) {
 
 #if !defined(DISABLE_JOIN)
     if( LMIC.devaddr == 0 && (LMIC.opmode & OP_JOINING) == 0 ) {
+        LMIC_DEBUG_PRINTF("%lu: StarJoining!\n", os_getTime());
         LMIC_startJoining();
         return;
     }

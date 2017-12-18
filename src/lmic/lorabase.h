@@ -32,6 +32,10 @@
 extern "C"{
 #endif
 
+#ifndef _LMIC_CONFIG_PRECONDITIONS_H_
+# include "lmic_config_preconditions.h"
+#endif
+
 // ================================================================================
 // BEG: Keep in sync with lorabase.hpp
 //
@@ -55,9 +59,17 @@ enum { MAX_LEN_FRAME     = 64 };
 enum { LEN_DEVNONCE      =  2 };
 enum { LEN_ARTNONCE      =  3 };
 enum { LEN_NETID         =  3 };
+
+#if defined(FOR_LG01_GW)
+enum { DELAY_JACC1       =  8 }; // in secs
+enum { DELAY_EXTDNW2     =  2 }; // in secs
+#else
 enum { DELAY_JACC1       =  5 }; // in secs
-enum { DELAY_DNW1        =  1 }; // in secs down window #1
 enum { DELAY_EXTDNW2     =  1 }; // in secs
+#endif  // LG01 have longer process time
+
+enum { DELAY_DNW1        =  1 }; // in secs down window #1
+
 enum { DELAY_JACC2       =  DELAY_JACC1+(int)DELAY_EXTDNW2 }; // in secs
 enum { DELAY_DNW2        =  DELAY_DNW1 +(int)DELAY_EXTDNW2 }; // in secs down window #1
 enum { BCN_INTV_exp      = 7 };
