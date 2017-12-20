@@ -1,14 +1,14 @@
 // project-specific definitions for otaa sensor
 
 //Choose the Frequency Plan for LoRaWAN
-#define CFG_eu868 1
+//#define CFG_eu868 1
 //#define CFG_eu868 1
 //#define CFG_us915 1
 //#define CFG_cn783 1   // not yet
 //#define CFG_eu433 1   // not yet
 //#define CFG_au921 1
 //#define CFG_cn490 1   // not yet
-//#define CFG_as923 1
+#define CFG_as923 1
 //#define CFG_kr921 1   // not yet
 //#define CFG_in866 1
 
@@ -24,8 +24,6 @@
 // Requires ping to be disabled too
 #define DISABLE_BEACONS
 
-//???????????需要吗
-#define DISABLE_INVERT_IQ_ON_RX
 
 //Uncomment this to use the node with LG01
 #define FOR_LG01_GW
