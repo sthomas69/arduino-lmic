@@ -12,6 +12,10 @@
 # include "lmic_config_preconditions.h"
 #endif
 
+#ifndef FOR_LG01_GW
+#define FOR_LG01_GW
+#endif
+
 // if you're editing this file directly (and not editing the project-config file
 // referenced from the pre-conditions file), then uncomment exactly one of the 
 // following to select the operating bandplan
@@ -78,7 +82,7 @@
 // configured (e.g. on AVR it is not by default), otherwise using it can
 // cause crashing.
 #ifndef LMIC_DEBUG_LEVEL
-#define LMIC_DEBUG_LEVEL 2
+#define LMIC_DEBUG_LEVEL 0
 #endif
 
 // Enable this to allow using printf() to print to the given serial port

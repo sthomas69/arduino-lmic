@@ -93,9 +93,13 @@ ostime_t LMICau921_dr2hsym(uint8_t dr) {
 
 
 u4_t LMICau921_convFreq(xref2cu1_t ptr) {
+#if defined(FOR_LG01_GW)
+        u4_t freq = AU921_125kHz_UPFBASE;
+#else
         u4_t freq = (os_rlsbf4(ptr - 1) >> 8) * 100;
         if (freq < AU921_FREQ_MIN || freq > AU921_FREQ_MAX)
                 freq = 0;
+#endif
         return freq;
 }
 

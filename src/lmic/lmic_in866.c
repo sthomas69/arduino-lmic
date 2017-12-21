@@ -85,6 +85,12 @@ ostime_t LMICin866_dr2hsym(uint8_t dr) {
 
 // All frequencies are marked as BAND_MILLI, and we don't do duty-cycle. But this lets
 // us reuse code.
+#if defined(for_lg01_gw)
+enum { NUM_DEFAULT_CHANNELS = 1 };
+static CONST_TABLE(u4_t, iniChannelFreq)[NUM_DEFAULT_CHANNELS] = {
+        IN866_F1 | BAND_MILLI, 
+};
+#else
 enum { NUM_DEFAULT_CHANNELS = 3 };
 static CONST_TABLE(u4_t, iniChannelFreq)[NUM_DEFAULT_CHANNELS] = {
         // Default operational frequencies
@@ -92,6 +98,7 @@ static CONST_TABLE(u4_t, iniChannelFreq)[NUM_DEFAULT_CHANNELS] = {
         IN866_F2 | BAND_MILLI, 
         IN866_F3 | BAND_MILLI,
 };
+#endif
 
 // india ignores join, becuase the channel setup is the same either way.
 void LMICin866_initDefaultChannels(bit_t join) {
@@ -140,9 +147,13 @@ bit_t LMIC_setupChannel(u1_t chidx, u4_t freq, u2_t drmap, s1_t band) {
 
 
 u4_t LMICin866_convFreq(xref2cu1_t ptr) {
+#if defined(FOR_LG01_GW)
+        u4_t freq = IN866_F1;
+#else
         u4_t freq = (os_rlsbf4(ptr - 1) >> 8) * 100;
         if (freq < IN866_FREQ_MIN || freq > IN866_FREQ_MAX)
                 freq = 0;
+#endif
         return freq;
 }
 

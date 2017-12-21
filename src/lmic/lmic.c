@@ -1056,6 +1056,11 @@ static bit_t processJoinAccept (void) {
             // https://github.com/mcci-catena/arduino-lmic/issues/19
     } else if ( LMICbandplan_hasJoinCFlist() && dlen > LEN_JA ) {
         dlen = OFF_CFLIST;
+#if defined(FOR_LG01_GW)
+        u4_t freq = LMICbandplan_convFreq(&LMIC.frame[dlen]);
+        LMIC_setupChannel(3, freq, 0, -1);
+        LMIC_DEBUG_PRINTF("%lu: Setup channel, freq=%lu\n", os_getTime(), (unsigned long)freq);
+#else
         for( u1_t chidx=3; chidx<8; chidx++, dlen+=3 ) {
             u4_t freq = LMICbandplan_convFreq(&LMIC.frame[dlen]);
             if( freq ) {
@@ -1065,6 +1070,7 @@ static bit_t processJoinAccept (void) {
 #endif
             }
         }
+#endif
     }
 
     // already incremented when JOIN REQ got sent off

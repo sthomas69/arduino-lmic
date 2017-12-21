@@ -103,9 +103,7 @@ ostime_t LMICeulike_nextJoinState(uint8_t nDefaultChannels) {
         // Try each default channel with same DR
         // If all fail try next lower datarate
 		
-		#if defined(FOR_LG01_GW)
-		//	Don't change SF for LG01
-		#else
+		#if !defined(FOR_LG01_GW)
         	if (++LMIC.txChnl == /* NUM_DEFAULT_CHANNELS */ nDefaultChannels)
                 LMIC.txChnl = 0;
         	if ((++LMIC.txCnt % nDefaultChannels) == 0) {

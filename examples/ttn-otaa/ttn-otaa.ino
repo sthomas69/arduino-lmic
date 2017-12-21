@@ -154,7 +154,10 @@ void onEvent (ev_t ev) {
             Serial.println(F("EV_LINK_ALIVE"));
             break;
         case EV_TXSTART:
-            Serial.println(F("EV_TXSTART"));
+            Serial.print(F("EV_TXSTART, freq="));
+            Serial.print(LMIC.freq);
+            Serial.print(F(", SF=SF"));
+            Serial.println(getSf(LMIC.rps) + 6);
             break;
          default:
             Serial.println(F("Unknown event"));

@@ -8,7 +8,7 @@
 //#define CFG_eu433 1   // not yet
 //#define CFG_au921 1
 //#define CFG_cn490 1   // not yet
-#define CFG_as923 1
+//#define CFG_as923 1
 //#define CFG_kr921 1   // not yet
 //#define CFG_in866 1
 

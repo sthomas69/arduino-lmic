@@ -155,12 +155,19 @@ ostime_t LMICas923_dr2hsym(uint8_t dr) {
 
 
 // Default duty cycle is 1%.
+#if defined(FOR_LG01_GW)
+enum { NUM_DEFAULT_CHANNELS = 1};
+static CONST_TABLE(u4_t, iniChannelFreq)[NUM_DEFAULT_CHANNELS] = {
+            AS923_F1 | BAND_CENTI,
+};
+#else
 enum { NUM_DEFAULT_CHANNELS = 2 };
 static CONST_TABLE(u4_t, iniChannelFreq)[NUM_DEFAULT_CHANNELS] = {
         // Default operational frequencies
         AS923_F1 | BAND_CENTI, 
         AS923_F2 | BAND_CENTI,
 };
+#endif
 
 // as923 ignores join, becuase the channel setup is the same either way.
 void LMICas923_initDefaultChannels(bit_t join) {
@@ -212,9 +219,13 @@ bit_t LMIC_setupChannel(u1_t chidx, u4_t freq, u2_t drmap, s1_t band) {
 
 
 u4_t LMICas923_convFreq(xref2cu1_t ptr) {
+#if defined(FOR_LG01_GW)
+    freq =  AS923_F1;
+#else
         u4_t freq = (os_rlsbf4(ptr - 1) >> 8) * 100;
         if (freq < AS923_FREQ_MIN || freq > AS923_FREQ_MAX)
                 freq = 0;
+#endif
         return freq;
 }
 

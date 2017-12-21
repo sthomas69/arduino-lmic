@@ -83,6 +83,12 @@ ostime_t LMICeu868_dr2hsym(uint8_t dr) {
 }
 
 
+#if defined(FOR_LG01_GW)
+enum { NUM_DEFAULT_CHANNELS = 1 };
+static CONST_TABLE(u4_t, iniChannelFreq)[1] = {
+    EU868_F1 | BAND_MILLI,
+};
+#else
 enum { NUM_DEFAULT_CHANNELS = 3 };
 static CONST_TABLE(u4_t, iniChannelFreq)[6] = {
         // Join frequencies and duty cycle limit (0.1%)
@@ -90,6 +96,7 @@ static CONST_TABLE(u4_t, iniChannelFreq)[6] = {
         // Default operational frequencies and duty cycle limit (1%)
         EU868_F1 | BAND_CENTI, EU868_F2 | BAND_CENTI, EU868_F3 | BAND_CENTI,
 };
+#endif
 
 void LMICeu868_initDefaultChannels(bit_t join) {
         os_clearMem(&LMIC.channelFreq, sizeof(LMIC.channelFreq));
@@ -155,9 +162,13 @@ bit_t LMIC_setupChannel(u1_t chidx, u4_t freq, u2_t drmap, s1_t band) {
 
 
 u4_t LMICeu868_convFreq(xref2cu1_t ptr) {
+#if defined(FOR_LG01_GW)
+        u4_t freq = EU868_F1;
+#else
         u4_t freq = (os_rlsbf4(ptr - 1) >> 8) * 100;
         if (freq < EU868_FREQ_MIN || freq > EU868_FREQ_MAX)
                 freq = 0;
+#endif
         return freq;
 }
 
