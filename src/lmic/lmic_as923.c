@@ -220,7 +220,7 @@ bit_t LMIC_setupChannel(u1_t chidx, u4_t freq, u2_t drmap, s1_t band) {
 
 u4_t LMICas923_convFreq(xref2cu1_t ptr) {
 #if defined(FOR_LG01_GW)
-    freq =  AS923_F1;
+    u4_t freq =  AS923_F1;
 #else
         u4_t freq = (os_rlsbf4(ptr - 1) >> 8) * 100;
         if (freq < AS923_FREQ_MIN || freq > AS923_FREQ_MAX)
