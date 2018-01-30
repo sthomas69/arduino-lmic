@@ -29,9 +29,6 @@
  *
  *******************************************************************************/
 
- // References:
- // [feather] adafruit-feather-m0-radio-with-lora-module.pdf
-
 #include <lmic.h>
 #include <hal/hal.h>
 #include <SPI.h>
@@ -39,16 +36,16 @@
 // LoRaWAN NwkSKey, network session key
 // This is the default Semtech key, which is used by the early prototype TTN
 // network.
-static const PROGMEM u1_t NWKSKEY[16] = { 0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0xD2, 0xA6, 0xAB, 0xF7, 0x15, 0x88, 0x09, 0xCF, 0x4F, 0x3C };
+static const PROGMEM u1_t NWKSKEY[16] = { 0x11, 0xB5, 0x16, 0xC4, 0x6D, 0x2A, 0x78, 0x33, 0x02, 0x38, 0x46, 0xD4, 0x59, 0xC1, 0xEC, 0xA1 };
 
 // LoRaWAN AppSKey, application session key
 // This is the default Semtech key, which is used by the early prototype TTN
 // network.
-static const u1_t PROGMEM APPSKEY[16] = { 0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0xD2, 0xA6, 0xAB, 0xF7, 0x15, 0x88, 0x09, 0xCF, 0x4F, 0x3C };
+static const u1_t PROGMEM APPSKEY[16] = { 0x87, 0x30, 0xE5, 0x28, 0xAD, 0x05, 0x54, 0x2E, 0x44, 0x6D, 0xFF, 0x4E, 0xA3, 0x4A, 0x07, 0xBF };
 
 // LoRaWAN end-device address (DevAddr)
 // See http://thethingsnetwork.org/wiki/AddressSpace
-static const u4_t DEVADDR = 0x03FF0001 ; // <-- Change this address for every node!
+static const u4_t DEVADDR = 0x260118AD; // <-- Change this address for every node!
 
 // These callbacks are only used in over-the-air activation, so they are
 // left empty here (we cannot leave them out completely unless
@@ -140,6 +137,8 @@ void onEvent (ev_t ev) {
 }
 
 void do_send(osjob_t* j){
+    Serial.println("");
+    Serial.println("###############################################################");
     // Check if there is not a current TX/RX job running
     if (LMIC.opmode & OP_TXRXPEND) {
         Serial.println(F("OP_TXRXPEND, not sending"));
@@ -223,10 +222,10 @@ void setup() {
     // TTN uses SF9 for its RX2 window.
     LMIC.dn2Dr = DR_SF9;
     #if defined(CFG_eu868)
-    #if defined(FOR_LG01_GW)
-      LMIC_disableChannel(1);    //disable channel 1 
-      LMIC_disableChannel(2);  // disable channel 2 
-    #endif
+      #if defined(FOR_LG01_GW)
+        LMIC_disableChannel(0);    //disable channel 0 
+        LMIC_disableChannel(1);  // disable channel 1 
+      #endif
     #endif
 
     // Set data rate and transmit power for uplink (note: txpow seems to be ignored by the library)
