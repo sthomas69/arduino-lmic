@@ -17,15 +17,12 @@ struct lmic_pinmap {
     u1_t rxtx;
     u1_t rst;
     u1_t dio[NUM_DIO];
-    u1_t rxtx_rx_active;
-    u4_t spi_freq;
 };
 
 // Use this for any unused pins.
 const u1_t LMIC_UNUSED_PIN = 0xff;
 
-// Declared here, to be defined and initialized by the application
-// use os_init_ex() if you want not to use a const table.
+// Declared here, to be defined an initialized by the application
 extern const lmic_pinmap lmic_pins;
 
 #endif // _hal_hal_h_

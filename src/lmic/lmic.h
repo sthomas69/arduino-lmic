@@ -1,29 +1,13 @@
-/*
- * Copyright (c) 2014-2016 IBM Corporation.
- * All rights reserved.
+/*******************************************************************************
+ * Copyright (c) 2014-2015 IBM Corporation.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
- *  * Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *  * Neither the name of the <organization> nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+ * Contributors:
+ *    IBM Zurich Research Lab - initial API, implementation and documentation
+ *******************************************************************************/
 
 //! @file
 //! @brief LMIC API
@@ -34,50 +18,14 @@
 #include "oslmic.h"
 #include "lorabase.h"
 
-#if LMIC_DEBUG_LEVEL > 0
-# if defined(LMIC_DEBUG_INCLUDE)
-#   define LMIC_STRINGIFY_(x) #x
-#   define LMIC_STRINGIFY(x) LMIC_STRINGIFY_(x)
-#   include LMIC_STRINGIFY(LMIC_DEBUG_INCLUDE)
-# endif
-// if LMIC_DEBUG_PRINTF is now defined, just use it. This lets you do anything
-// you like with a sufficiently crazy header file.
-# ifndef LMIC_DEBUG_PRINTF
-//  otherwise, check whether someone configured a print-function to be used,
-//  and use it if so.
-#   ifdef LMIC_DEBUG_PRINTF_FN
-#     define LMIC_DEBUG_PRINTF(f, ...) LMIC_DEBUG_PRINTF_FN(f, ## __VA_ARGS__)
-#   else // ndef LMIC_DEBUG_PRINTF_FN
-//    if there's no other info, just use printf. In a pure Arduino environment,
-//    that's what will happen.
-#     define LMIC_DEBUG_PRINTF(f, ...) printf(f, ## __VA_ARGS__)
-#   endif // ndef LMIC_DEBUG_PRINTF_FN
-# endif // ndef LMIC_DEBUG_PRINTF
-# ifndef LMIC_DEBUG_FLUSH
-#   ifdef LMIC_DEBUG_FLUSH_FN
-#     define LMIC_DEBUG_FLUSH() LMIC_DEBUG_FLUSH_FN()
-#   else // ndef LMIC_DEBUG_FLUSH_FN
-//    if there's no other info, assume that flush is not needed.
-#     define LMIC_DEBUG_FLUSH() do { ; } while (0)
-#   endif // ndef LMIC_DEBUG_FLUSH_FN
-# endif // ndef LMIC_DEBUG_FLUSH
-#else // LMIC_DEBUG_LEVEL == 0
-// If debug level is zero, printf and flush expand to nothing.
-# define LMIC_DEBUG_PRINTF(f, ...)      do { ; } while (0)
-# define LMIC_DEBUG_FLUSH()             do { ; } while (0)
-#endif // LMIC_DEBUG_LEVEL == 0
-
 #ifdef __cplusplus
 extern "C"{
 #endif
 
 // LMIC version
 #define LMIC_VERSION_MAJOR 1
-#define LMIC_VERSION_MINOR 6
-#define LMIC_VERSION_BUILD 1468577746
-
-//! Only For Antenna Tuning Tests !
-//#define CFG_TxContinuousMode 1
+#define LMIC_VERSION_MINOR 5
+#define LMIC_VERSION_BUILD 1431528305
 
 enum { MAX_FRAME_LEN      =  64 };   //!< Library cap on max frame length
 enum { TXCONF_ATTEMPTS    =   8 };   //!< Transmit attempts for confirmed frames
@@ -95,7 +43,7 @@ enum { JOIN_GUARD_ms      =  9000 };  // msecs - don't start Join Req/Acc transa
 enum { TXRX_BCNEXT_secs   =     2 };  // secs - earliest start after beacon time
 enum { RETRY_PERIOD_secs  =     3 };  // secs - random period for retrying a confirmed send
 
-#if CFG_LMIC_EU_like // EU868 spectrum ====================================================
+#if defined(CFG_eu868) // EU868 spectrum ====================================================
 
 enum { MAX_CHANNELS = 16 };      //!< Max supported channels
 enum { MAX_BANDS    =  4 };
@@ -110,9 +58,10 @@ struct band_t {
 };
 TYPEDEF_xref2band_t; //!< \internal
 
-#elif CFG_LMIC_US_like  // US915 spectrum =================================================
+#elif defined(CFG_us915)  // US915 spectrum =================================================
 
 enum { MAX_XCHANNELS = 2 };      // extra channels in RAM, channels 0-71 are immutable
+enum { MAX_TXPOW_125kHz = 30 };
 
 #endif // ==========================================================================
 
@@ -127,7 +76,7 @@ struct rxsched_t {
     u1_t     dr;
     u1_t     intvExp;   // 0..7
     u1_t     slot;      // runs from 0 to 128
-    u1_t     rxsyms;
+    u2_t     rxsyms;
     ostime_t rxbase;
     ostime_t rxtime;    // start of next spot
     u4_t     freq;
@@ -191,8 +140,7 @@ enum _ev_t { EV_SCAN_TIMEOUT=1, EV_BEACON_FOUND,
              EV_BEACON_MISSED, EV_BEACON_TRACKED, EV_JOINING,
              EV_JOINED, EV_RFU1, EV_JOIN_FAILED, EV_REJOIN_FAILED,
              EV_TXCOMPLETE, EV_LOST_TSYNC, EV_RESET,
-             EV_RXCOMPLETE, EV_LINK_DEAD, EV_LINK_ALIVE, EV_SCAN_FOUND,
-             EV_TXSTART };
+             EV_RXCOMPLETE, EV_LINK_DEAD, EV_LINK_ALIVE };
 typedef enum _ev_t ev_t;
 
 enum {
@@ -208,24 +156,23 @@ struct lmic_t {
     s1_t        rssi;
     s1_t        snr;
     rps_t       rps;
-    u1_t        rxsyms;
+    u2_t        rxsyms;
     u1_t        dndr;
     s1_t        txpow;     // dBm
 
     osjob_t     osjob;
 
     // Channel scheduling
-#if CFG_LMIC_EU_like
+#if defined(CFG_eu868)
     band_t      bands[MAX_BANDS];
     u4_t        channelFreq[MAX_CHANNELS];
     u2_t        channelDrMap[MAX_CHANNELS];
     u2_t        channelMap;
-#elif CFG_LMIC_US_like
+#elif defined(CFG_us915)
     u4_t        xchFreq[MAX_XCHANNELS];    // extra channel frequencies (if device is behind a repeater)
     u2_t        xchDrMap[MAX_XCHANNELS];   // extra channel datarate ranges  ---XXX: ditto
     u2_t        channelMap[(72+MAX_XCHANNELS+15)/16];  // enabled bits
-    u2_t        activeChannels125khz;
-    u2_t        activeChannels500khz;
+    u2_t        chRnd;        // channel randomizer
 #endif
     u1_t        txChnl;          // channel for next TX
     u1_t        globalDutyRate;  // max rate: 1/2^k
@@ -264,7 +211,7 @@ struct lmic_t {
     u1_t        adrChanged;
 
     u1_t        rxDelay;      // Rx delay after TX
-
+    
     u1_t        margin;
     bit_t       ladrAns;      // link adr adapt answer pending
     bit_t       devsAns;      // device status answer pending
@@ -276,14 +223,6 @@ struct lmic_t {
 #if !defined(DISABLE_MCMD_SNCH_REQ)
     u1_t        snchAns;      // answer set new channel
 #endif
-#if LMIC_ENABLE_TxParamSetupReq
-    bit_t       txParamSetupAns; // transmit setup answer pending.
-    u1_t        txParam;        // the saved TX param byte.
-#endif
-
-    // rx1DrOffset is the offset from uplink to downlink datarate
-    u1_t        rx1DrOffset;  // captured from join. zero by default.
-
     // 2nd RX window (after up stream)
     u1_t        dn2Dr;
     u4_t        dn2Freq;
@@ -316,8 +255,6 @@ struct lmic_t {
     ostime_t    bcnRxtime;
     bcninfo_t   bcninfo;      // Last received beacon info
 #endif
-
-    u1_t        noRXIQinversion;
 };
 //! \var struct lmic_t LMIC
 //! The state of LMIC MAC layer is encapsulated in this variable.
@@ -325,13 +262,18 @@ DECLARE_LMIC; //!< \internal
 
 //! Construct a bit map of allowed datarates from drlo to drhi (both included).
 #define DR_RANGE_MAP(drlo,drhi) (((u2_t)0xFFFF<<(drlo)) & ((u2_t)0xFFFF>>(15-(drhi))))
+#if defined(CFG_eu868)
+enum { BAND_MILLI=0, BAND_CENTI=1, BAND_DECI=2, BAND_AUX=3 };
 bit_t LMIC_setupBand (u1_t bandidx, s1_t txpow, u2_t txcap);
+#endif
 bit_t LMIC_setupChannel (u1_t channel, u4_t freq, u2_t drmap, s1_t band);
 void  LMIC_disableChannel (u1_t channel);
-void  LMIC_enableSubBand(u1_t band);
-void  LMIC_enableChannel(u1_t channel);
-void  LMIC_disableSubBand(u1_t band);
-void  LMIC_selectSubBand(u1_t band);
+#if defined(CFG_us915)
+void  LMIC_enableChannel (u1_t channel);
+void  LMIC_enableSubBand (u1_t band);
+void  LMIC_disableSubBand (u1_t band);
+void  LMIC_selectSubBand (u1_t band);
+#endif
 
 void  LMIC_setDrTxpow   (dr_t dr, s1_t txpow);  // set default/start DR/txpow
 void  LMIC_setAdrMode   (bit_t enabled);        // set ADR mode (if mobile turn off)
@@ -364,15 +306,9 @@ void LMIC_setSession (u4_t netid, devaddr_t devaddr, xref2u1_t nwkKey, xref2u1_t
 void LMIC_setLinkCheckMode (bit_t enabled);
 void LMIC_setClockError(u2_t error);
 
-u4_t LMIC_getSeqnoUp    (void);
-u4_t LMIC_setSeqnoUp    (u4_t);
-void LMIC_getSessionKeys (u4_t *netid, devaddr_t *devaddr, xref2u1_t nwkKey, xref2u1_t artKey);
-
 // Declare onEvent() function, to make sure any definition will have the
 // C conventions, even when in a C++ file.
 DECL_ON_LMIC_EVENT;
-
-
 
 // Special APIs - for development or testing
 // !!!See implementation for caveats!!!

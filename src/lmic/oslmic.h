@@ -1,29 +1,13 @@
-/*
- * Copyright (c) 2014-2016 IBM Corporation.
- * All rights reserved.
+/*******************************************************************************
+ * Copyright (c) 2014-2015 IBM Corporation.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
- *  * Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *  * Neither the name of the <organization> nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+ * Contributors:
+ *    IBM Zurich Research Lab - initial API, implementation and documentation
+ *******************************************************************************/
 
 //! \file
 #ifndef _oslmic_h_
@@ -35,6 +19,7 @@
 
 #include "config.h"
 #include <stdint.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -96,13 +81,11 @@ u1_t radio_rand1 (void);
 #define DEFINE_LMIC  struct lmic_t LMIC
 #define DECLARE_LMIC extern struct lmic_t LMIC
 
-int radio_init (void);
+void radio_init (void);
 void radio_irq_handler (u1_t dio);
 void os_init (void);
-int os_init_ex (const void *pPinMap);
 void os_runloop (void);
 void os_runloop_once (void);
-u1_t radio_rssi (void);
 
 //================================================================================
 
@@ -209,7 +192,7 @@ void os_wlsbf2 (xref2u1_t buf, u2_t value);
 #define os_getRndU2() ((u2_t)((os_getRndU1()<<8)|os_getRndU1()))
 #endif
 #ifndef os_crc16
-u2_t os_crc16 (xref2cu1_t d, uint len);
+u2_t os_crc16 (xref2u1_t d, uint len);
 #endif
 
 #endif // !HAS_os_calls
@@ -227,9 +210,6 @@ u2_t os_crc16 (xref2cu1_t d, uint len);
 
 // Helper to add a prefix to the table name
 #define RESOLVE_TABLE(table) constant_table_ ## table
-
-// get number of entries in table
-#define LENOF_TABLE(table) (sizeof(RESOLVE_TABLE(table)) / sizeof(RESOLVE_TABLE(table)[0]))
 
 // Accessors for table elements
 #define TABLE_GET_U1(table, index) table_get_u1(RESOLVE_TABLE(table), index)
@@ -266,6 +246,8 @@ u2_t os_crc16 (xref2cu1_t d, uint len);
 
     // For AVR, store constants in PROGMEM, saving on RAM usage
     #define CONST_TABLE(type, name) const type PROGMEM RESOLVE_TABLE(name)
+
+    #define lmic_printf(fmt, ...) printf_P(PSTR(fmt), ## __VA_ARGS__)
 #else
     inline u1_t table_get_u1(const u1_t *table, size_t index) { return table[index]; }
     inline s1_t table_get_s1(const s1_t *table, size_t index) { return table[index]; }
@@ -277,6 +259,7 @@ u2_t os_crc16 (xref2cu1_t d, uint len);
 
     // Declare a table
     #define CONST_TABLE(type, name) const type RESOLVE_TABLE(name)
+    #define lmic_printf printf
 #endif
 
 // ======================================================================
