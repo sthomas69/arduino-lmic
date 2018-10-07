@@ -5,8 +5,39 @@
 // gcc commandline. Since Arduino does not allow easily modifying the
 // compiler commandline, use this file instead.
 
+
 #define CFG_eu868 1
 //#define CFG_us915 1
+//#define CFG_au921 1
+//#define CFG_as923 1
+//#define CFG_in866 1
+
+#define LG02_LG01 1
+
+//US915: DR_SF10=0, DR_SF9=1, DR_SF8=2, DR_SF7=3, DR_SF8C=4 
+//       DR_SF12CR=8, DR_SF11CR=9, DR_SF10CR=10, DR_SF9CR=11, DR_SF8CR=12, DR_SF7CR
+#if defined(CFG_us915) && defined(LG02_LG01)
+// CFG_us915 || CFG_as923 
+#define LG02_UPFREQ   902320000
+#define LG02_DNWFREQ  923300000
+#define LG02_RXSF     3      // DR_SF7
+#define LG02_TXSF     8      // DR_SF12CR
+#elif defined(CFG_eu868) && defined(LG02_LG01)
+// CFG_eu868
+//EU868: DR_SF12=0, DR_SF11=1, DR_SF10=2, DR_SF9=3, DR_SF8=4, DR_SF7=5, DR_SF7B=1, DR_FSK, DR_NONE
+#define LG02_UPFREQ   868100000
+#define LG02_DNWFREQ  869525000
+#define LG02_RXSF     5      // DR_SF7
+#define LG02_TXSF     0       // DR_SF12
+#endif
+
+// Set this to 1 to enable some basic debug output (using printf) about
+// RF settings used during transmission and reception. Set to 2 to
+// enable more verbose output. Make sure that printf is actually
+// configured (e.g. on AVR it is not by default), otherwise using it can
+// cause crashing.
+#define LMIC_DEBUG_LEVEL 1
+
 // This is the SX1272/SX1273 radio, which is also used on the HopeRF
 // RFM92 boards.
 //#define CFG_sx1272_radio 1
@@ -20,12 +51,6 @@
 #define US_PER_OSTICK (1 << US_PER_OSTICK_EXPONENT)
 #define OSTICKS_PER_SEC (1000000 / US_PER_OSTICK)
 
-// Set this to 1 to enable some basic debug output (using printf) about
-// RF settings used during transmission and reception. Set to 2 to
-// enable more verbose output. Make sure that printf is actually
-// configured (e.g. on AVR it is not by default), otherwise using it can
-// cause crashing.
-#define LMIC_DEBUG_LEVEL 1
 
 // Enable this to allow using printf() to print to the given serial port
 // (or any other Print object). This can be easy for debugging. The
@@ -63,7 +88,9 @@
 // hear gateways). This should probably only be used when debugging
 // and/or when talking to the radio directly (e.g. like in the "raw"
 // example).
+#if defined(LG02_LG01)
 #define DISABLE_INVERT_IQ_ON_RX
+#endif
 
 // This allows choosing between multiple included AES implementations.
 // Make sure exactly one of these is uncommented.

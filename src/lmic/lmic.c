@@ -12,7 +12,7 @@
 //! \file
 #include "lmic.h"
 
-#if defined(DISABLE_BEACONS) && !defined(DISABLE_PING)
+#if defined(DISABLE_BEACONS) && !defined(DISABLE_PING) 
 #error Ping needs beacon tracking
 #endif
 
@@ -534,6 +534,15 @@ void LMIC_setPingable (u1_t intvExp) {
 //
 // BEG: EU868 related stuff
 //
+#if defined(LG02_LG01)
+enum { NUM_DEFAULT_CHANNELS=3 };
+static CONST_TABLE(u4_t, iniChannelFreq)[6] = {
+    // Join frequencies and duty cycle limit (0.1%)
+    EU868_F1|BAND_MILLI, EU868_F1|BAND_MILLI, EU868_F1|BAND_MILLI,
+    // Default operational frequencies
+    EU868_F1|BAND_CENTI, EU868_F1|BAND_CENTI, EU868_F1|BAND_CENTI,
+};
+#else
 enum { NUM_DEFAULT_CHANNELS=3 };
 static CONST_TABLE(u4_t, iniChannelFreq)[6] = {
     // Join frequencies and duty cycle limit (0.1%)
@@ -541,6 +550,7 @@ static CONST_TABLE(u4_t, iniChannelFreq)[6] = {
     // Default operational frequencies
     EU868_F1|BAND_CENTI, EU868_F2|BAND_CENTI, EU868_F3|BAND_CENTI,
 };
+#endif
 
 static void initDefaultChannels (bit_t join) {
     os_clearMem(&LMIC.channelFreq, sizeof(LMIC.channelFreq));
@@ -693,7 +703,7 @@ static void setBcnRxParams (void) {
 static void initJoinLoop (void) {
     LMIC.txChnl = os_getRndU1() % 3;
     LMIC.adrTxPow = 14;
-    setDrJoin(DRCHG_SET, DR_SF7);
+    setDrJoin(DRCHG_SET, DR_DFLTMIN);
     initDefaultChannels(1);
     ASSERT((LMIC.opmode & OP_NEXTCHNL)==0);
     LMIC.txend = LMIC.bands[BAND_MILLI].avail + rndDelay(8);
@@ -705,6 +715,7 @@ static ostime_t nextJoinState (void) {
 
     // Try 869.x and then 864.x with same DR
     // If both fail try next lower datarate
+#if !defined(LG02_LG01)
     if( ++LMIC.txChnl == 3 )
         LMIC.txChnl = 0;
     if( (++LMIC.txCnt & 1) == 0 ) {
@@ -712,8 +723,9 @@ static ostime_t nextJoinState (void) {
         if( LMIC.datarate == DR_SF12 )
             failed = 1; // we have tried all DR - signal EV_JOIN_FAILED
         else
-            setDrJoin(DRCHG_NOJACC, LMIC.datarate);
+            setDrJoin(DRCHG_NOJACC, decDR((dr_t)LMIC.datarate));
     }
+#endif
     // Clear NEXTCHNL because join state engine controls channel hopping
     LMIC.opmode &= ~OP_NEXTCHNL;
     // Move txend to randomize synchronized concurrent joins.
@@ -901,10 +913,20 @@ static ostime_t nextJoinState (void) {
     //   SF8C        on a random channel 64..71
     //
     u1_t failed = 0;
-    if( LMIC.datarate != DR_DFLTMIN ) {
+#if !defined(LG02_LG01)
+    if( LMIC.datarate != DR_SF8C ) {
         LMIC.txChnl = 64+(LMIC.txChnl&7);
-        setDrJoin(DRCHG_SET, DR_DFLTMIN);
-    } 
+        setDrJoin(DRCHG_SET, DR_SF8C);
+    } else {
+        LMIC.txChnl = os_getRndU1() & 0x3F;
+        s1_t dr = DR_SF7 - ++LMIC.txCnt;
+        if( dr < DR_SF10 ) {
+            dr = DR_SF10;
+            failed = 1; // All DR exhausted - signal failed
+        }
+        setDrJoin(DRCHG_SET, dr);
+    }
+#endif
     LMIC.opmode &= ~OP_NEXTCHNL;
     LMIC.txend = os_getTime() +
         (isTESTMODE()
@@ -1345,7 +1367,11 @@ static void setupRx2 (void) {
 static void schedRx12 (ostime_t delay, osjobcb_t func, u1_t dr) {
     ostime_t hsym = dr2hsym(dr);
 
+#if defined(LG02_LG01)
     LMIC.rxsyms = MINRX_SYMS * 200;
+#else
+    LMIC.rxsyms = MINRX_SYMS;
+#endif
 
     // If a clock error is specified, compensate for it by extending the
     // receive window
@@ -1370,7 +1396,11 @@ static void schedRx12 (ostime_t delay, osjobcb_t func, u1_t dr) {
 
     // Center the receive window on the center of the expected preamble
     // (again note that hsym is half a sumbol time, so no /2 needed)
+#if defined(LG02_LG01)
     LMIC.rxtime = LMIC.txend + delay + PAMBL_SYMS * hsym - LMIC.rxsyms;
+#else
+    LMIC.rxtime = LMIC.txend + delay + PAMBL_SYMS * hsym - LMIC.rxsyms * hsym;
+#endif
 
     os_setTimedCallback(&LMIC.osjob, LMIC.rxtime - RX_RAMPUP, func);
 }
@@ -2062,7 +2092,11 @@ static void engineUpdate (void) {
         #endif
         // Find next suitable channel and return availability time
         if( (LMIC.opmode & OP_NEXTCHNL) != 0 ) {
+#if defined(LG02_LG01)
+            txbeg = LMIC.txend = now;
+#else
             txbeg = LMIC.txend = nextTx(now);
+#endif
             LMIC.opmode &= ~OP_NEXTCHNL;
             #if LMIC_DEBUG_LEVEL > 1
                 lmic_printf("%lu: Airtime available at %lu (channel duty limit)\n", os_getTime(), txbeg);
