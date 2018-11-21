@@ -6,8 +6,8 @@
 // compiler commandline, use this file instead.
 
 
-#define CFG_eu868 1
-//#define CFG_us915 1
+//#define CFG_eu868 1
+#define CFG_us915 1
 //#define CFG_au921 1
 //#define CFG_as923 1
 //#define CFG_in866 1
@@ -20,15 +20,15 @@
 // CFG_us915 || CFG_as923 
 #define LG02_UPFREQ   902320000
 #define LG02_DNWFREQ  923300000
-#define LG02_RXSF     3      // DR_SF7
-#define LG02_TXSF     8      // DR_SF12CR
+#define LG02_RXSF     3      // DR_SF7  For LG01/LG02 Tx
+#define LG02_TXSF     8      // DR_SF12CR For LG02/LG02 Rx
 #elif defined(CFG_eu868) && defined(LG02_LG01)
 // CFG_eu868
 //EU868: DR_SF12=0, DR_SF11=1, DR_SF10=2, DR_SF9=3, DR_SF8=4, DR_SF7=5, DR_SF7B=1, DR_FSK, DR_NONE
 #define LG02_UPFREQ   868100000
 #define LG02_DNWFREQ  869525000
-#define LG02_RXSF     5      // DR_SF7
-#define LG02_TXSF     0       // DR_SF12
+#define LG02_RXSF     5      // DR_SF7 For LG01/LG02 Tx
+#define LG02_TXSF     0       // DR_SF12 For LG02/LG02 Rx
 #endif
 
 // Set this to 1 to enable some basic debug output (using printf) about
@@ -55,7 +55,9 @@
 // Enable this to allow using printf() to print to the given serial port
 // (or any other Print object). This can be easy for debugging. The
 // current implementation only works on AVR, though.
+#if defined(LMIC_DEBUG_LEVEL)
 #define LMIC_PRINTF_TO Serial
+#endif
 
 // Any runtime assertion failures are printed to this serial port (or
 // any other Print object). If this is unset, any failures just silently
@@ -88,9 +90,7 @@
 // hear gateways). This should probably only be used when debugging
 // and/or when talking to the radio directly (e.g. like in the "raw"
 // example).
-#if defined(LG02_LG01)
-#define DISABLE_INVERT_IQ_ON_RX
-#endif
+//#define DISABLE_INVERT_IQ_ON_RX
 
 // This allows choosing between multiple included AES implementations.
 // Make sure exactly one of these is uncommented.

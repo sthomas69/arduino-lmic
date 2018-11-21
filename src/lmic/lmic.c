@@ -1562,6 +1562,9 @@ static bit_t processJoinAccept (void) {
 
 
 static void processRx2Jacc (xref2osjob_t osjob) {
+    #if LMIC_DEBUG_LEVEL > 0
+        lmic_printf("%lu: JaccRX2, dataLen=%d\n", os_getTime(), LMIC.dataLen);
+    #endif
     if( LMIC.dataLen == 0 )
         LMIC.txrxFlags = 0;  // nothing in 1st/2nd DN slot
     processJoinAccept();
@@ -1575,6 +1578,9 @@ static void setupRx2Jacc (xref2osjob_t osjob) {
 
 
 static void processRx1Jacc (xref2osjob_t osjob) {
+    #if LMIC_DEBUG_LEVEL > 0
+        lmic_printf("%lu: JaccRX1, dataLen=%d\n", os_getTime(), LMIC.dataLen);
+    #endif
     if( LMIC.dataLen == 0 || !processJoinAccept() )
         schedRx12(DELAY_JACC2_osticks, FUNC_ADDR(setupRx2Jacc), LMIC.dn2Dr);
 }

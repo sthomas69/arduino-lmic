@@ -94,6 +94,7 @@
 #define FSKRegPayloadLength                        0x32
 #define FSKRegNodeAdrs                             0x33
 #define LORARegInvertIQ                            0x33
+#define LORARegInvertIQ2                           0x3B
 #define FSKRegBroadcastAdrs                        0x34
 #define FSKRegFifoThresh                           0x35
 #define FSKRegSeqConfig1                           0x36
@@ -244,6 +245,17 @@
 
 #define RF_IMAGECAL_IMAGECAL_RUNNING                0x20
 #define RF_IMAGECAL_IMAGECAL_DONE                   0x00  // Default
+
+// RegInvertIQ
+#define INVERTIQ_RX_MASK                       0xBF                                                
+#define INVERTIQ_RX_OFF                        0x00                                                
+#define INVERTIQ_RX_ON                         0x40                                                
+#define INVERTIQ_TX_MASK                       0xFE                                                
+#define INVERTIQ_TX_OFF                        0x01                                                
+#define INVERTIQ_TX_ON                         0x00  
+
+#define INVERTIQ2_ON                           0x19
+#define INVERTIQ2_OFF                          0x1D
 
 
 // RADIO STATE
@@ -561,7 +573,8 @@ static void rxlora (u1_t rxmode) {
     writeReg(LORARegPayloadMaxLength, 64);
 #if !defined(DISABLE_INVERT_IQ_ON_RX)
     // use inverted I/Q signal (prevent mote-to-mote communication)
-    writeReg(LORARegInvertIQ, readReg(LORARegInvertIQ)|(1<<6));
+    writeReg(LORARegInvertIQ, (readReg(LORARegInvertIQ) & INVERTIQ_RX_MASK & INVERTIQ_TX_MASK) | INVERTIQ_RX_ON | INVERTIQ_TX_OFF);
+    writeReg(LORARegInvertIQ2, INVERTIQ2_ON);
 #endif
     // set symbol timeout (for single rx)
     writeReg(LORARegSymbTimeoutLsb, LMIC.rxsyms);
