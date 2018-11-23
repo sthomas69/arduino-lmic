@@ -578,6 +578,7 @@ static void rxlora (u1_t rxmode) {
 #endif
     // set symbol timeout (for single rx)
     writeReg(LORARegSymbTimeoutLsb, LMIC.rxsyms);
+    //writeReg(LORARegSymbTimeoutLsb, 0x08);
     // set sync word
     writeReg(LORARegSyncWord, LORA_MAC_PREAMBLE);
 
@@ -606,13 +607,14 @@ static void rxlora (u1_t rxmode) {
         u1_t sf = getSf(LMIC.rps) + 6; // 1 == SF7
         u1_t bw = getBw(LMIC.rps);
         u1_t cr = getCr(LMIC.rps);
-        lmic_printf("%lu: %s, freq=%lu, SF=%d, BW=%d, CR=4/%d, IH=%d\n",
+        lmic_printf("%lu: %s, freq=%lu, SF=%d, BW=%d, CR=4/%d, IH=%d, rxsyms=%d\n",
                os_getTime(),
                rxmode == RXMODE_SINGLE ? "RXMODE_SINGLE" : (rxmode == RXMODE_SCAN ? "RXMODE_SCAN" : "UNKNOWN_RX"),
                LMIC.freq, sf,
                bw == BW125 ? 125 : (bw == BW250 ? 250 : 500),
                cr == CR_4_5 ? 5 : (cr == CR_4_6 ? 6 : (cr == CR_4_7 ? 7 : 8)),
-               getIh(LMIC.rps)
+               getIh(LMIC.rps),
+               LMIC.rxsyms
        );
     }
 #endif

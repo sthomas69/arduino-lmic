@@ -16,6 +16,7 @@
 #error Ping needs beacon tracking
 #endif
 
+#define MAXRX_SYMS 255
 #if !defined(MINRX_SYMS)
 #define MINRX_SYMS 5
 #endif // !defined(MINRX_SYMS)
@@ -1367,11 +1368,7 @@ static void setupRx2 (void) {
 static void schedRx12 (ostime_t delay, osjobcb_t func, u1_t dr) {
     ostime_t hsym = dr2hsym(dr);
 
-#if defined(LG02_LG01)
-    LMIC.rxsyms = MINRX_SYMS * 200;
-#else
-    LMIC.rxsyms = MINRX_SYMS;
-#endif
+    LMIC.rxsyms = MAXRX_SYMS;
 
     // If a clock error is specified, compensate for it by extending the
     // receive window
@@ -1396,11 +1393,8 @@ static void schedRx12 (ostime_t delay, osjobcb_t func, u1_t dr) {
 
     // Center the receive window on the center of the expected preamble
     // (again note that hsym is half a sumbol time, so no /2 needed)
-#if defined(LG02_LG01)
-    LMIC.rxtime = LMIC.txend + delay + PAMBL_SYMS * hsym - LMIC.rxsyms;
-#else
+    //
     LMIC.rxtime = LMIC.txend + delay + PAMBL_SYMS * hsym - LMIC.rxsyms * hsym;
-#endif
 
     os_setTimedCallback(&LMIC.osjob, LMIC.rxtime - RX_RAMPUP, func);
 }
