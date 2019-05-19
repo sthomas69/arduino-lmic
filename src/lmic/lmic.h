@@ -58,7 +58,7 @@ struct band_t {
 };
 TYPEDEF_xref2band_t; //!< \internal
 
-#elif defined(CFG_us915)  // US915 spectrum =================================================
+#elif defined(CFG_us915) || defined(CFG_au921)  // US915 spectrum =================================================
 
 enum { MAX_XCHANNELS = 2 };      // extra channels in RAM, channels 0-71 are immutable
 enum { MAX_TXPOW_125kHz = 30 };
@@ -169,6 +169,11 @@ struct lmic_t {
     u2_t        channelDrMap[MAX_CHANNELS];
     u2_t        channelMap;
 #elif defined(CFG_us915)
+    u4_t        xchFreq[MAX_XCHANNELS];    // extra channel frequencies (if device is behind a repeater)
+    u2_t        xchDrMap[MAX_XCHANNELS];   // extra channel datarate ranges  ---XXX: ditto
+    u2_t        channelMap[(72+MAX_XCHANNELS+15)/16];  // enabled bits
+    u2_t        chRnd;        // channel randomizer
+#elif defined(CFG_au921)
     u4_t        xchFreq[MAX_XCHANNELS];    // extra channel frequencies (if device is behind a repeater)
     u2_t        xchDrMap[MAX_XCHANNELS];   // extra channel datarate ranges  ---XXX: ditto
     u2_t        channelMap[(72+MAX_XCHANNELS+15)/16];  // enabled bits

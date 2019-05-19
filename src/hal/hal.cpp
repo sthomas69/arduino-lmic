@@ -220,7 +220,7 @@ void hal_printf_init() {
     memset(&uartout, 0, sizeof(uartout));
 
     // fill in the UART file descriptor with pointer to writer.
-    fdev_setup_stream (&uartout, uart_putchar, NULL, _FDEV_SETUP_WRITE);
+    //fdev_setup_stream (&uartout, uart_putchar, NULL, _FDEV_SETUP_WRITE);
 
     // The uart is the standard output device STDOUT.
     stdout = &uartout ;
@@ -236,7 +236,7 @@ void hal_init () {
     hal_time_init();
 #if defined(LMIC_PRINTF_TO)
     // printf support
-    hal_printf_init();
+    //hal_printf_init();
 #endif
 }
 

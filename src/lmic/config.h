@@ -1,4 +1,4 @@
-#ifndef _lmic_config_h_
+﻿#ifndef _lmic_config_h_
 #define _lmic_config_h_
 
 // In the original LMIC code, these config values were defined on the
@@ -6,13 +6,15 @@
 // compiler commandline, use this file instead.
 
 
-#define CFG_eu868 1
+//#define CFG_eu868 1
 //#define CFG_us915 1
-//#define CFG_au921 1
+#define CFG_au921 1
 //#define CFG_as923 1
 //#define CFG_in866 1
 
-//#define LG02_LG01 1
+#define LG02_LG01 1
+//#define ACTIVATION_METHOD_ABP 1
+#define ACTIVATION_METHOD_OTAA 1
 
 //US915: DR_SF10=0, DR_SF9=1, DR_SF8=2, DR_SF7=3, DR_SF8C=4 
 //       DR_SF12CR=8, DR_SF11CR=9, DR_SF10CR=10, DR_SF9CR=11, DR_SF8CR=12, DR_SF7CR
@@ -22,6 +24,20 @@
 #define LG02_DNWFREQ  923300000
 #define LG02_RXSF     3      // DR_SF7  For LG01/LG02 Tx
 #define LG02_TXSF     8      // DR_SF12CR For LG02/LG02 Rx
+#elif defined(CFG_au921) && defined(LG02_LG01)
+// CFG_au921 || CFG_as923 
+    #if defined(ACTIVATION_METHOD_OTAA)
+        #define LG02_UPFREQ   917000000
+        #define LG02_DNWFREQ  923900000
+        #define LG02_RXSF     3      // DR_SF7  For LG01/LG02 Tx
+        #define LG02_TXSF     8      // DR_SF12CR For LG02/LG02 Rx
+    #else
+        #define LG02_UPFREQ   917000000
+        #define LG02_DNWFREQ  923900000
+        #define LG02_RXSF     3      // DR_SF7  For LG01/LG02 Tx
+        #define LG02_TXSF     5      // DR_SF12CR For LG02/LG02 Rx
+    #endif
+
 #elif defined(CFG_eu868) && defined(LG02_LG01)
 // CFG_eu868
 //EU868: DR_SF12=0, DR_SF11=1, DR_SF10=2, DR_SF9=3, DR_SF8=4, DR_SF7=5, DR_SF7B=1, DR_FSK, DR_NONE

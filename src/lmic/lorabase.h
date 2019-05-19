@@ -34,6 +34,7 @@ TYPEDEF_xref2rps_t;
 enum { ILLEGAL_RPS = 0xFF };
 enum { DR_PAGE_EU868 = 0x00 };
 enum { DR_PAGE_US915 = 0x10 };
+enum { DR_PAGE_AU921 = 0x08 };
 
 // Global maximum frame length
 enum { STD_PREAMBLE_LEN  =  8 };
@@ -119,7 +120,7 @@ enum {
     LEN_BCN          = 17
 };
 
-#elif defined(CFG_us915)  // =========================================
+#elif defined(CFG_us915) || defined(CFG_au921)  // =========================================
 
 enum _dr_us915_t { DR_SF10=0, DR_SF9, DR_SF8, DR_SF7, DR_SF8C, DR_NONE,
                    // Devices behind a router:
@@ -150,6 +151,65 @@ enum { US915_125kHz_UPFBASE = 902300000,
 };
 enum { US915_FREQ_MIN = 902000000,
        US915_FREQ_MAX = 928000000 };
+
+enum { CHNL_PING         = 0 }; // used only for default init of state (follows beacon - rotating)
+enum { FREQ_PING         = US915_500kHz_DNFBASE + CHNL_PING*US915_500kHz_DNFSTEP };  // default ping freq
+enum { DR_PING           = DR_SF10CR };       // default ping DR
+enum { CHNL_DNW2         = 0 };
+enum { FREQ_DNW2         = US915_500kHz_DNFBASE + CHNL_DNW2*US915_500kHz_DNFSTEP };
+#if defined(LG02_LG01) && defined(LG02_TXSF)
+enum { DR_DNW2           = LG02_TXSF };
+#else
+enum { DR_DNW2           = DR_SF12CR };
+#endif
+enum { CHNL_BCN          = 0 }; // used only for default init of state (rotating beacon scheme)
+enum { DR_BCN            = DR_SF10CR };
+enum { AIRTIME_BCN       = 72192 };  // micros
+
+enum {
+    // Beacon frame format US SF10
+    OFF_BCN_NETID    = 0,
+    OFF_BCN_TIME     = 3,
+    OFF_BCN_CRC1     = 7,
+    OFF_BCN_INFO     = 9,
+    OFF_BCN_LAT      = 10,
+    OFF_BCN_LON      = 13,
+    OFF_BCN_RFU1     = 16,
+    OFF_BCN_CRC2     = 17,
+    LEN_BCN          = 19
+};
+
+#elif defined(CFG_au921)  // =========================================
+
+enum _dr_us915_t { DR_SF10=0, DR_SF9, DR_SF8, DR_SF7, DR_SF8C, DR_NONE,
+                   // Devices behind a router:
+                   DR_SF12CR=8, DR_SF11CR, DR_SF10CR, DR_SF9CR, DR_SF8CR, DR_SF7CR };
+#if defined(LG02_LG01) && defined(LG02_RXSF)
+enum { DR_DFLTMIN = LG02_RXSF };
+#else
+enum { DR_DFLTMIN = DR_SF8C };
+#endif
+enum { DR_PAGE = DR_PAGE_AU921 };
+
+// Default frequency plan for US 915MHz
+#if defined(LG02_LG01) && defined(LG02_UPFREQ)
+enum { US915_125kHz_UPFBASE = LG02_UPFREQ,
+       US915_125kHz_UPFSTEP =    0,
+       US915_500kHz_UPFBASE = LG02_UPFREQ,
+       US915_500kHz_UPFSTEP =   0,
+       US915_500kHz_DNFBASE = LG02_DNWFREQ,
+       US915_500kHz_DNFSTEP =    0
+#else
+enum { US915_125kHz_UPFBASE = 902300000,
+       US915_125kHz_UPFSTEP =    200000,
+       US915_500kHz_UPFBASE = 903000000,
+       US915_500kHz_UPFSTEP =   1600000,
+       US915_500kHz_DNFBASE = 923300000,
+       US915_500kHz_DNFSTEP =    600000
+#endif
+};
+enum { US915_FREQ_MIN = 916800000,
+       US915_FREQ_MAX = 918200000 };
 
 enum { CHNL_PING         = 0 }; // used only for default init of state (follows beacon - rotating)
 enum { FREQ_PING         = US915_500kHz_DNFBASE + CHNL_PING*US915_500kHz_DNFSTEP };  // default ping freq
@@ -341,7 +401,7 @@ enum {
     MCMD_LADR_8dBm      = 3,
     MCMD_LADR_5dBm      = 4,
     MCMD_LADR_2dBm      = 5,
-#elif defined(CFG_us915)
+#elif defined(CFG_us915) || defined(CFG_au921)
     MCMD_LADR_SF10      = DR_SF10<<4,
     MCMD_LADR_SF9       = DR_SF9 <<4,
     MCMD_LADR_SF8       = DR_SF8 <<4,

@@ -38,7 +38,7 @@
 #if defined(CFG_eu868)
 #define DNW2_SAFETY_ZONE       ms2osticks(3000)
 #endif
-#if defined(CFG_us915)
+#if defined(CFG_us915) || defined(CFG_au921)
 #define DNW2_SAFETY_ZONE       ms2osticks(750)
 #endif
 
@@ -235,7 +235,7 @@ static CONST_TABLE(s1_t, TXPOWLEVELS)[] = {
 };
 #define pow2dBm(mcmd_ladr_p1) (TABLE_GET_S1(TXPOWLEVELS, (mcmd_ladr_p1&MCMD_LADR_POW_MASK)>>MCMD_LADR_POW_SHIFT))
 
-#elif defined(CFG_us915) // ========================================
+#elif defined(CFG_us915) || defined(CFG_au921) // ========================================
 
 #define maxFrameLen(dr) ((dr)<=DR_SF11CR ? TABLE_GET_U1(maxFrameLens, (dr)) : 0xFF)
 CONST_TABLE(u1_t, maxFrameLens) [] = { 24,66,142,255,255,255,255,255,  66,142 };
@@ -377,7 +377,7 @@ static CONST_TABLE(ostime_t, DR2HSYM_osticks)[] = {
     us2osticksRound(128<<2),  // DR_SF7
     us2osticksRound(128<<1),  // DR_SF7B
     us2osticksRound(80)       // FSK -- not used (time for 1/2 byte)
-#elif defined(CFG_us915)
+#elif defined(CFG_us915) || defined(CFG_au921)
 #define dr2hsym(dr) (TABLE_GET_OSTIME(DR2HSYM_osticks, (dr)&7))  // map DR_SFnCR -> 0-6
     us2osticksRound(128<<5),  // DR_SF10   DR_SF12CR
     us2osticksRound(128<<4),  // DR_SF9    DR_SF11CR
@@ -756,7 +756,7 @@ static ostime_t nextJoinState (void) {
 // END: EU868 related stuff
 //
 // ================================================================================
-#elif defined(CFG_us915)
+#elif defined(CFG_us915) || defined(CFG_au921)
 // ================================================================================
 //
 // BEG: US915 related stuff
@@ -1016,7 +1016,7 @@ static int decodeBeacon (void) {
     if(
 #if CFG_eu868
         d[OFF_BCN_CRC1] != (u1_t)os_crc16(d,OFF_BCN_CRC1)
-#elif CFG_us915
+#elif CFG_us915 || defined(CFG_au921)
         os_rlsbf2(&d[OFF_BCN_CRC1]) != os_crc16(d,OFF_BCN_CRC1)
 #endif
         )
@@ -1507,7 +1507,7 @@ static bit_t processJoinAccept (void) {
     initDefaultChannels(0);
 #endif
     if( dlen > LEN_JA ) {
-#if defined(CFG_us915)
+#if defined(CFG_us915) || defined(CFG_au921)
         goto badframe;
 #endif
         dlen = OFF_CFLIST;
@@ -2026,7 +2026,7 @@ static void processBeacon (xref2osjob_t osjob) {
     LMIC.bcnRxtime = LMIC.bcninfo.txtime + BCN_INTV_osticks - calcRxWindow(0,DR_BCN);
     LMIC.bcnRxsyms = LMIC.rxsyms;
   rev:
-#if CFG_us915
+#if CFG_us915 || defined(CFG_au921)
     LMIC.bcnChnl = (LMIC.bcnChnl+1) & 7;
 #endif
 #if !defined(DISABLE_PING)
