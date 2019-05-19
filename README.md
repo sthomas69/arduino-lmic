@@ -363,3 +363,5 @@ Most source files in this repository are made available under the
 Eclipse Public License v1.0. The examples which use a more liberal
 license. Some of the AES code is available under the LGPL. Refer to each
 individual source file for more details.
+
+Making this Library work for LG02 and Australia
